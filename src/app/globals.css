@@ -367,7 +367,7 @@ input, button, textarea, select {
   position: relative;
 }
 
-.input-with-icon .material-icons-round {
+.input-with-icon > .material-icons-round {
   position: absolute;
   left: 12px;
   top: 50%;
@@ -974,3 +974,15 @@ tr:hover td {
 .stagger-item:nth-child(10) { animation-delay: 450ms; }
 .stagger-item:nth-child(11) { animation-delay: 500ms; }
 .stagger-item:nth-child(12) { animation-delay: 550ms; }
+
+/* Autofill override to integrate with design theme */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-text-fill-color: var(--text-primary) !important;
+  -webkit-box-shadow: 0 0 0px 1000px var(--bg-secondary) inset !important;
+  box-shadow: 0 0 0px 1000px var(--bg-secondary) inset !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+

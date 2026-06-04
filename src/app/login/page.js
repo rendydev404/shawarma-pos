@@ -47,6 +47,7 @@ export default function LoginPage() {
       {/* Ambient decoration */}
       <div style={styles.ambientOrb1} />
       <div style={styles.ambientOrb2} />
+      <div style={styles.ambientOrb3} />
 
       <div style={styles.loginCard} className="animate-scale-in">
         {/* Logo Section */}
@@ -67,7 +68,7 @@ export default function LoginPage() {
 
           <div className="input-group">
             <label htmlFor="login-email">Email</label>
-            <div className="input-with-icon">
+            <div className="input-with-icon" style={{ width: '100%' }}>
               <span className="material-icons-round">mail</span>
               <input
                 id="login-email"
@@ -79,13 +80,14 @@ export default function LoginPage() {
                 required
                 autoComplete="email"
                 autoFocus
+                style={{ width: '100%' }}
               />
             </div>
           </div>
 
           <div className="input-group">
             <label htmlFor="login-password">Password</label>
-            <div className="input-with-icon" style={{ position: 'relative' }}>
+            <div className="input-with-icon" style={{ position: 'relative', width: '100%' }}>
               <span className="material-icons-round">lock</span>
               <input
                 id="login-password"
@@ -96,7 +98,7 @@ export default function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 autoComplete="current-password"
-                style={{ paddingRight: '44px' }}
+                style={{ paddingRight: '44px', width: '100%' }}
               />
               <button
                 type="button"
@@ -149,71 +151,88 @@ const styles = {
     padding: 'var(--space-lg)',
     position: 'relative',
     overflow: 'hidden',
+    background: 'radial-gradient(circle at 50% 50%, #FAF5FF, #FFFBEB, #FAF5FF)',
   },
   ambientOrb1: {
     position: 'fixed',
-    top: '-20%',
+    top: '-10%',
     right: '-10%',
-    width: '600px',
-    height: '600px',
+    width: '650px',
+    height: '650px',
     borderRadius: '50%',
-    background: 'radial-gradient(circle, rgba(245, 158, 11, 0.08) 0%, transparent 70%)',
+    background: 'radial-gradient(circle, rgba(245, 158, 11, 0.16) 0%, transparent 70%)',
     pointerEvents: 'none',
   },
   ambientOrb2: {
     position: 'fixed',
-    bottom: '-20%',
+    bottom: '-10%',
     left: '-10%',
-    width: '500px',
-    height: '500px',
+    width: '600px',
+    height: '600px',
     borderRadius: '50%',
-    background: 'radial-gradient(circle, rgba(13, 148, 136, 0.06) 0%, transparent 70%)',
+    background: 'radial-gradient(circle, rgba(13, 148, 136, 0.12) 0%, transparent 70%)',
     pointerEvents: 'none',
+  },
+  ambientOrb3: {
+    position: 'fixed',
+    top: '40%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: '800px',
+    height: '800px',
+    borderRadius: '50%',
+    background: 'radial-gradient(circle, rgba(220, 38, 38, 0.04) 0%, transparent 60%)',
+    pointerEvents: 'none',
+    zIndex: 0,
   },
   loginCard: {
     width: '100%',
     maxWidth: '420px',
-    background: 'var(--bg-glass-strong)',
+    background: 'rgba(255, 255, 255, 0.85)',
     backdropFilter: 'blur(20px)',
     WebkitBackdropFilter: 'blur(20px)',
-    border: '1px solid var(--border-color)',
+    border: '1px solid rgba(245, 158, 11, 0.2)',
     borderRadius: 'var(--radius-xl)',
-    boxShadow: 'var(--shadow-xl)',
+    boxShadow: '0 25px 50px -12px rgba(15, 23, 42, 0.15), 0 0 50px -10px var(--color-primary-glow), inset 0 1px 0 rgba(255,255,255,0.6)',
     overflow: 'hidden',
     position: 'relative',
     zIndex: 1,
   },
   logoSection: {
     textAlign: 'center',
-    padding: '40px 32px 24px',
+    padding: '44px 32px 28px',
     borderBottom: '1px solid var(--border-color)',
-    background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.05), transparent)',
+    background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.08), rgba(13, 148, 136, 0.02))',
   },
   logoIcon: {
-    fontSize: '56px',
-    marginBottom: '12px',
-    filter: 'drop-shadow(0 4px 12px rgba(245, 158, 11, 0.3))',
+    fontSize: '64px',
+    marginBottom: '14px',
+    filter: 'drop-shadow(0 8px 16px rgba(245, 158, 11, 0.25))',
+    animation: 'pulse 2s ease-in-out infinite',
   },
   brandName: {
     fontFamily: 'var(--font-heading)',
-    fontSize: 'var(--text-2xl)',
+    fontSize: 'var(--text-3xl)',
     fontWeight: '800',
     background: 'linear-gradient(135deg, var(--color-primary-light), var(--color-primary))',
     WebkitBackgroundClip: 'text',
     WebkitTextFillColor: 'transparent',
     backgroundClip: 'text',
-    marginBottom: '4px',
+    marginBottom: '6px',
+    letterSpacing: '-0.02em',
   },
   brandSubtitle: {
-    fontSize: 'var(--text-sm)',
+    fontSize: 'var(--text-xs)',
     color: 'var(--text-tertiary)',
-    fontWeight: '400',
+    fontWeight: '500',
+    textTransform: 'uppercase',
+    letterSpacing: '0.1em',
   },
   form: {
-    padding: '32px',
+    padding: '36px 32px',
     display: 'flex',
     flexDirection: 'column',
-    gap: '20px',
+    gap: '24px',
   },
   errorBox: {
     display: 'flex',
@@ -229,7 +248,7 @@ const styles = {
   },
   eyeButton: {
     position: 'absolute',
-    right: '8px',
+    right: '12px',
     top: '50%',
     transform: 'translateY(-50%)',
     background: 'none',
@@ -245,14 +264,19 @@ const styles = {
   },
   loginButton: {
     width: '100%',
-    marginTop: '8px',
+    marginTop: '12px',
+    background: 'linear-gradient(135deg, var(--color-primary-light), var(--color-primary))',
+    boxShadow: '0 4px 14px rgba(245, 158, 11, 0.4)',
   },
   footer: {
-    padding: '16px 32px 24px',
+    padding: '16px 32px 28px',
     textAlign: 'center',
+    borderTop: '1px solid rgba(15, 23, 42, 0.03)',
   },
   footerText: {
     fontSize: 'var(--text-xs)',
     color: 'var(--text-tertiary)',
+    fontWeight: '500',
   },
 };
+
