@@ -38,8 +38,29 @@ export default function UsersPage() {
     try {
       // Create a temporary Supabase client with persistSession: false
       // so it doesn't overwrite the logged-in admin's session in localStorage/cookies
-      const url = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
-      const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder';
+      let url = (process.env.NEXT_PUBLIC_SUPABASE_URL || '').trim();
+      let key = (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '').trim();
+
+      const isValidUrl = (str) => {
+        try {
+          const u = new URL(str);
+          return u.protocol === 'http:' || u.protocol === 'https:';
+        } catch (_) {
+          return false;
+        }
+      };
+
+      if (!isValidUrl(url)) {
+        url = 'https://placeholder.supabase.co';
+      }
+      if (!key || key === 'placeholder' || key === 'undefined') {
+        key = 'placeholder';
+      }
+
+      if (url === 'https://placeholder.supabase.co' || key === 'placeholder') {
+        console.warn('Warning: Using fallback Supabase placeholder client credentials in temporary signup client!');
+      }
+
       const tempSupabase = createBrowserClient(
         url,
         key,
