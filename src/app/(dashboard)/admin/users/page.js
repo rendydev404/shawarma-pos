@@ -38,9 +38,11 @@ export default function UsersPage() {
     try {
       // Create a temporary Supabase client with persistSession: false
       // so it doesn't overwrite the logged-in admin's session in localStorage/cookies
+      const url = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
+      const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder';
       const tempSupabase = createBrowserClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+        url,
+        key,
         {
           auth: {
             persistSession: false,
