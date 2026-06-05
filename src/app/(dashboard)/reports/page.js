@@ -132,8 +132,8 @@ export default function ReportsPage() {
               </div>
 
               {/* Simple Bar Chart */}
-              <div className="chart-container" style={{ overflowX: 'auto', paddingBottom: '8px' }}>
-                <div style={{ ...reportStyles.chart, minWidth: days > 7 ? '640px' : 'auto' }}>
+              <div className="chart-container" style={{ width: '100%', overflowX: 'auto', paddingBottom: '8px' }}>
+                <div style={{ ...reportStyles.chart, minWidth: days === 30 ? '1200px' : days === 14 ? '700px' : '500px' }}>
                   {chartData.length === 0 ? (
                     <div style={{ display: 'flex', flexDirection: 'column', flex: 1, alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-tertiary)', gap: '8px' }}>
                       <span className="material-icons-round" style={{ fontSize: '32px' }}>analytics</span>
@@ -258,8 +258,8 @@ const reportStyles = {
   page: { padding: 'var(--space-lg)', display: 'flex', flexDirection: 'column', gap: 'var(--space-lg)' },
   statsGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 'var(--space-md)' },
   chartHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-lg)', flexWrap: 'wrap', gap: 'var(--space-sm)' },
-  chart: { display: 'flex', alignItems: 'flex-end', gap: '4px', height: '250px', paddingTop: 'var(--space-md)' },
-  chartBar: { flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', minWidth: 0 },
+  chart: { display: 'flex', alignItems: 'flex-end', gap: '8px', height: '250px', paddingTop: 'var(--space-md)' },
+  chartBar: { flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', minWidth: '35px' },
   barContainer: { width: '100%', height: '200px', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' },
   bar: {
     width: '80%', maxWidth: '40px', borderRadius: '6px 6px 0 0',
