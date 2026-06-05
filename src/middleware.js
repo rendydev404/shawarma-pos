@@ -11,7 +11,7 @@ export async function middleware(request) {
   
   // Safe fallback to prevent build/runtime crash when env vars are missing
   const safeUrl = url && url.startsWith('http') ? url : 'https://uqjahxvyqpxfvkeutwpm.supabase.co';
-  const safeKey = anonKey || 'placeholder';
+  const safeKey = anonKey || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxamFoeHZ5cXB4ZnZrZXV0d3BtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1MjA0MzQsImV4cCI6MjA5NjA5NjQzNH0.V7wqxpSxvk2aDS0mGYM5uzO1L9ZNWzQsunMusWOaZIE';
 
   const supabase = createServerClient(
     safeUrl,

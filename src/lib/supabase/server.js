@@ -4,16 +4,12 @@ import { cookies } from 'next/headers';
 export async function createClient() {
   const cookieStore = await cookies();
 
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  
-  // Safe fallback to prevent build crash when env vars are missing
-  const safeUrl = url && url.startsWith('http') ? url : 'https://uqjahxvyqpxfvkeutwpm.supabase.co';
-  const safeKey = anonKey || 'placeholder';
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://uqjahxvyqpxfvkeutwpm.supabase.co';
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxamFoeHZ5cXB4ZnZrZXV0d3BtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1MjA0MzQsImV4cCI6MjA5NjA5NjQzNH0.V7wqxpSxvk2aDS0mGYM5uzO1L9ZNWzQsunMusWOaZIE';
 
   return createServerClient(
-    safeUrl,
-    safeKey,
+    url,
+    anonKey,
     {
       cookies: {
         getAll() {
