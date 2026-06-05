@@ -169,6 +169,7 @@ export default function OutletsPage() {
             existing.splice(0, existing.length, ...refetchedData);
           }
         }
+      }
       // Automatic migration block removed so user edits are not overwritten
 
       setOutlets(existing);
