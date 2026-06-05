@@ -114,10 +114,6 @@ export default function CartPanel({
             <span style={cartStyles.summaryLabel}>Subtotal</span>
             <span style={cartStyles.summaryValue}>{formatRupiah(subtotal)}</span>
           </div>
-          <div style={cartStyles.summaryRow}>
-            <span style={cartStyles.summaryLabel}>PPN (11%)</span>
-            <span style={cartStyles.summaryValue}>{formatRupiah(tax)}</span>
-          </div>
           <div style={cartStyles.divider} />
           <div style={cartStyles.summaryRow}>
             <span style={cartStyles.totalLabel}>TOTAL</span>
@@ -196,6 +192,7 @@ const cartStyles = {
     fontSize: 'var(--text-xs)',
     color: 'var(--text-tertiary)',
     whiteSpace: 'nowrap',
+    paddingRight: '20px',
   },
   itemActions: {
     display: 'flex',
@@ -234,6 +231,7 @@ const cartStyles = {
     fontSize: 'var(--text-sm)',
     fontWeight: '700',
     color: 'var(--color-primary-light)',
+    paddingRight: '12px',
   },
   summary: {
     padding: 'var(--space-md)',
@@ -254,6 +252,7 @@ const cartStyles = {
     fontSize: 'var(--text-sm)',
     fontWeight: '600',
     color: 'var(--text-primary)',
+    paddingRight: '12px',
   },
   divider: {
     height: '1px',
@@ -271,6 +270,7 @@ const cartStyles = {
     fontWeight: '800',
     color: 'var(--color-primary-light)',
     fontFamily: 'var(--font-heading)',
+    paddingRight: '12px',
   },
   checkoutBtn: {
     width: '100%',

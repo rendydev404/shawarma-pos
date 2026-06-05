@@ -57,7 +57,13 @@ export const NAV_ITEMS = [
     href: '/menu',
     label: 'Menu',
     icon: 'menu_book',
-    roles: [ROLES.SUPER_ADMIN, ROLES.OUTLET_MANAGER],
+    roles: [ROLES.OUTLET_MANAGER],
+  },
+  {
+    href: '/admin/categories',
+    label: 'Kelola Kategori',
+    icon: 'category',
+    roles: [ROLES.SUPER_ADMIN],
   },
   {
     href: '/orders',

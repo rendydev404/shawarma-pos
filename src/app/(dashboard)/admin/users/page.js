@@ -13,6 +13,7 @@ export default function UsersPage() {
   const [outlets, setOutlets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [editing, setEditing] = useState(null);
   const [filterOutlet, setFilterOutlet] = useState('all');
   const { toasts, addToast, dismissToast } = useToast();
 
@@ -110,6 +111,26 @@ export default function UsersPage() {
     }
   };
 
+  const handleUpdateUser = async (form) => {
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          full_name: form.full_name,
+          role: form.role,
+          outlet_id: form.outlet_id || null,
+        })
+        .eq('id', editing.id);
+
+      if (error) throw error;
+      addToast('User berhasil diperbarui', 'success');
+      setEditing(null);
+      fetchData();
+    } catch (err) {
+      addToast('Gagal memperbarui user: ' + err.message, 'error');
+    }
+  };
+
   const filteredUsers = filterOutlet === 'all' ? users : users.filter((u) => u.outlet_id === filterOutlet);
 
   return (
@@ -159,7 +180,14 @@ export default function UsersPage() {
                         }}>
                           {user.full_name?.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase()}
                         </div>
-                        <span style={{ fontWeight: '600' }}>{user.full_name}</span>
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                          <span style={{ fontWeight: '600' }}>{user.full_name}</span>
+                          {user.email && (
+                            <span style={{ fontSize: '10px', color: 'var(--text-tertiary)', marginTop: '2px' }}>
+                              {user.email}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </td>
                     <td>
@@ -186,6 +214,13 @@ export default function UsersPage() {
                     </td>
                     <td>
                       <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                        <button className="btn btn-ghost btn-sm" onClick={() => setEditing(user)}
+                          title="Edit User"
+                          style={{ color: 'var(--color-primary)', padding: '4px' }}>
+                          <span className="material-icons-round" style={{ fontSize: '18px' }}>
+                            edit
+                          </span>
+                        </button>
                         <button className="btn btn-ghost btn-sm" onClick={() => toggleUserActive(user)}
                           title={user.is_active ? 'Nonaktifkan User' : 'Aktifkan User'}
                           style={{ color: user.is_active ? 'var(--color-danger)' : 'var(--color-success)', padding: '4px' }}>
@@ -214,6 +249,9 @@ export default function UsersPage() {
 
       {showModal && (
         <CreateUserModal outlets={outlets} onSave={handleCreateUser} onClose={() => setShowModal(false)} />
+      )}
+      {editing && (
+        <EditUserModal user={editing} outlets={outlets} onSave={handleUpdateUser} onClose={() => setEditing(null)} />
       )}
       <Toast toasts={toasts} onDismiss={dismissToast} />
     </>
@@ -269,6 +307,64 @@ function CreateUserModal({ outlets, onSave, onClose }) {
           <div className="modal-footer">
             <button type="button" className="btn btn-secondary" onClick={onClose}>Batal</button>
             <button type="submit" className="btn btn-primary"><span className="material-icons-round">person_add</span>Buat User</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+function EditUserModal({ user, outlets, onSave, onClose }) {
+  const [form, setForm] = useState({
+    full_name: user?.full_name || '',
+    outlet_id: user?.outlet_id || '',
+    role: user?.role || 'cashier',
+  });
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header">
+          <h2>Edit User</h2>
+          <button className="btn btn-ghost btn-icon" onClick={onClose}><span className="material-icons-round">close</span></button>
+        </div>
+        <form onSubmit={(e) => { e.preventDefault(); onSave(form); }}>
+          <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div className="input-group">
+              <label>Nama Lengkap *</label>
+              <input className="input" value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} required placeholder="Ahmad Kasir" />
+            </div>
+
+            {user?.email && (
+              <div className="input-group">
+                <label>Email (Tidak Dapat Diubah)</label>
+                <input className="input" value={user.email} disabled style={{ opacity: 0.65, cursor: 'not-allowed', backgroundColor: 'rgba(255, 255, 255, 0.05)' }} />
+              </div>
+            )}
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div className="input-group">
+                <label>Outlet *</label>
+                <select className="input" value={form.outlet_id} onChange={(e) => setForm({ ...form, outlet_id: e.target.value })} required>
+                  <option value="">Pilih Outlet</option>
+                  {outlets.map((o) => (
+                    <option key={o.id} value={o.id}>{o.code} - {o.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="input-group">
+                <label>Role *</label>
+                <select className="input" value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })}>
+                  <option value="cashier">Kasir</option>
+                  <option value="outlet_manager">Manager Outlet</option>
+                  <option value="super_admin">Super Admin</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div className="modal-footer">
+            <button type="button" className="btn btn-secondary" onClick={onClose}>Batal</button>
+            <button type="submit" className="btn btn-primary"><span className="material-icons-round">save</span>Simpan</button>
           </div>
         </form>
       </div>

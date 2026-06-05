@@ -5,7 +5,7 @@
  */
 export function formatRupiah(amount) {
   if (amount == null || isNaN(amount)) return 'Rp 0';
-  return 'Rp ' + amount.toLocaleString('id-ID');
+  return 'Rp ' + Math.round(Number(amount)).toLocaleString('id-ID');
 }
 
 /**

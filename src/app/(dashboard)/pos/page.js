@@ -20,7 +20,7 @@ function cartReducer(state, action) {
           ...state,
           items: state.items.map((i) =>
             i.product_id === action.payload.id
-              ? { ...i, quantity: i.quantity + 1, subtotal: (i.quantity + 1) * i.product_price }
+              ? { ...i, quantity: i.quantity + 1, subtotal: Math.round((i.quantity + 1) * i.product_price) }
               : i
           ),
         };
@@ -32,9 +32,9 @@ function cartReducer(state, action) {
           {
             product_id: action.payload.id,
             product_name: action.payload.name,
-            product_price: action.payload.price,
+            product_price: Math.round(action.payload.price),
             quantity: 1,
-            subtotal: action.payload.price,
+            subtotal: Math.round(action.payload.price),
             notes: '',
           },
         ],
@@ -59,7 +59,7 @@ function cartReducer(state, action) {
             ? {
               ...i,
               quantity: action.payload.quantity,
-              subtotal: action.payload.quantity * i.product_price,
+              subtotal: Math.round(action.payload.quantity * i.product_price),
             }
             : i
         ),
@@ -84,6 +84,8 @@ function cartReducer(state, action) {
       return state;
   }
 }
+
+
 
 export default function POSPage() {
   const { profile, supabase } = useAuth();
@@ -115,13 +117,18 @@ export default function POSPage() {
     setLoading(true);
 
     try {
+      // Find Pusat outlet
+      const { data: outletsData } = await supabase.from('outlets').select('id, code, name');
+      const pusat = outletsData?.find(o => o.code === 'OTL01' || o.name.toLowerCase().includes('pusat'));
+      const pusatId = pusat ? pusat.id : outletId;
+
       const [catRes, prodRes] = await Promise.all([
         supabase
           .from('categories')
           .select('*')
-          .eq('outlet_id', outletId)
+          .eq('outlet_id', pusatId)
           .eq('is_active', true)
-          .order('sort_order', { ascending: true }),
+          .order('name', { ascending: true }),
         supabase
           .from('products')
           .select('*, categories(name)')
@@ -144,19 +151,66 @@ export default function POSPage() {
     fetchData();
   }, [fetchData]);
 
+  useEffect(() => {
+    // Lock document body scroll on the full-screen POS layout page
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, []);
+
   // Filter products
   const filteredProducts = products.filter((p) => {
-    const matchCategory = selectedCategory === 'all' || p.category_id === selectedCategory;
+    let matchCategory = false;
+    if (selectedCategory === 'all') {
+      matchCategory = true;
+    } else {
+      const activeCat = categories.find((c) => c.id === selectedCategory);
+      if (activeCat) {
+        const catNameLower = activeCat.name.toLowerCase();
+        if (catNameLower.includes('ayam')) {
+          matchCategory =
+            p.category_id === selectedCategory ||
+            p.name.toLowerCase().includes('ayam') ||
+            p.categories?.name?.toLowerCase().includes('ayam');
+        } else if (catNameLower.includes('sapi') || catNameLower.includes('beef')) {
+          matchCategory =
+            p.category_id === selectedCategory ||
+            p.name.toLowerCase().includes('sapi') ||
+            p.name.toLowerCase().includes('beef') ||
+            p.categories?.name?.toLowerCase().includes('sapi') ||
+            p.categories?.name?.toLowerCase().includes('beef');
+        } else if (catNameLower.includes('kentang') || catNameLower.includes('fries') || catNameLower.includes('cemilan')) {
+          matchCategory =
+            p.category_id === selectedCategory ||
+            p.name.toLowerCase().includes('kentang') ||
+            p.name.toLowerCase().includes('fries') ||
+            p.name.toLowerCase().includes('cemilan') ||
+            p.categories?.name?.toLowerCase().includes('cemilan');
+        } else if (catNameLower.includes('mix')) {
+          matchCategory =
+            p.category_id === selectedCategory ||
+            p.name.toLowerCase().includes('mix') ||
+            p.categories?.name?.toLowerCase().includes('mix');
+        } else {
+          matchCategory = p.category_id === selectedCategory;
+        }
+      } else {
+        matchCategory = p.category_id === selectedCategory;
+      }
+    }
+
     const matchSearch =
       !searchQuery ||
       p.name.toLowerCase().includes(searchQuery.toLowerCase());
     return matchCategory && matchSearch;
   });
 
-  // Calculate totals (Tax Inclusive)
-  const total = cart.items.reduce((sum, item) => sum + item.subtotal, 0);
-  const subtotal = Math.round(total / 1.11);
-  const tax = total - subtotal;
+  // Calculate totals (No PPN)
+  const subtotal = cart.items.reduce((sum, item) => sum + item.subtotal, 0);
+  const tax = 0;
+  const total = subtotal;
 
   // Handle checkout
   const handleCheckout = async (paymentMethod, amountPaid) => {
@@ -242,39 +296,42 @@ export default function POSPage() {
       <div className="pos-container">
         {/* Left: Menu Grid */}
         <div className="pos-menu-section">
-          {/* Search Bar */}
-          <div style={posStyles.searchBar}>
-            <div className="input-with-icon" style={{ flex: 1 }}>
-              <span className="material-icons-round">search</span>
-              <input
-                id="pos-search"
-                type="text"
-                className="input"
-                placeholder="Cari produk..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+          {/* Search and Filter Section */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
+            {/* Search Bar */}
+            <div style={posStyles.searchBar}>
+              <div className="input-with-icon" style={{ flex: 1 }}>
+                <span className="material-icons-round">search</span>
+                <input
+                  id="pos-search"
+                  type="text"
+                  className="input"
+                  placeholder="Cari produk..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
             </div>
-          </div>
 
-          {/* Category Tabs */}
-          <div style={posStyles.categoryTabs} className="category-tabs-container">
-            <button
-              className={`btn ${selectedCategory === 'all' ? 'btn-primary' : 'btn-secondary'} btn-sm`}
-              onClick={() => setSelectedCategory('all')}
-              id="pos-cat-all"
-            >
-              Semua
-            </button>
-            {categories.map((cat) => (
-              <button
-                key={cat.id}
-                className={`btn ${selectedCategory === cat.id ? 'btn-primary' : 'btn-secondary'} btn-sm`}
-                onClick={() => setSelectedCategory(cat.id)}
-              >
-                {cat.name}
-              </button>
-            ))}
+            {/* Dynamic Category Filter Bar from Database */}
+            <div style={posStyles.categoryTabs} className="no-scrollbar">
+              {[{ id: 'all', name: 'Semua Menu' }, ...categories].map((filter) => {
+                const isActive = selectedCategory === filter.id;
+                return (
+                  <button
+                    key={filter.id}
+                    onClick={() => setSelectedCategory(filter.id)}
+                    style={{
+                      ...posStyles.categoryTab,
+                      ...(isActive ? posStyles.categoryTabActive : {}),
+                    }}
+                    className="category-tab-btn"
+                  >
+                    {filter.name}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           {/* Product Grid */}
@@ -306,7 +363,7 @@ export default function POSPage() {
               </h2>
               <p style={{ color: 'var(--text-tertiary)', fontSize: 'var(--text-sm)', maxWidth: '320px', textAlign: 'center', lineHeight: 1.6 }}>
                 {searchQuery
-                  ? 'Coba kata kunci lain atau hapus filter kategori.'
+                  ? 'Coba kata kunci lain.'
                   : 'Tambahkan produk pertama Anda melalui halaman Menu di sidebar.'}
               </p>
             </div>
@@ -422,8 +479,31 @@ const posStyles = {
     display: 'flex',
     gap: 'var(--space-sm)',
     overflowX: 'auto',
-    paddingBottom: '4px',
+    paddingBottom: '8px',
     flexShrink: 0,
+    WebkitOverflowScrolling: 'touch',
+  },
+  categoryTab: {
+    padding: '8px 16px',
+    borderRadius: 'var(--radius-full)',
+    background: 'var(--bg-secondary)',
+    border: '1px solid var(--border-color)',
+    color: 'var(--text-secondary)',
+    fontSize: 'var(--text-sm)',
+    fontWeight: '600',
+    cursor: 'pointer',
+    whiteSpace: 'nowrap',
+    transition: 'all var(--transition-fast)',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+    outline: 'none',
+  },
+  categoryTabActive: {
+    background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))',
+    borderColor: 'transparent',
+    color: 'var(--text-inverse)',
+    boxShadow: '0 4px 12px var(--color-primary-glow)',
   },
   emptyHero: {
     display: 'flex',

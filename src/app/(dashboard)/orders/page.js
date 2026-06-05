@@ -216,7 +216,9 @@ export default function OrdersPage() {
               </div>
               <div style={{ marginTop: '16px', textAlign: 'right' }}>
                 <div style={{ color: 'var(--text-secondary)', fontSize: 'var(--text-sm)' }}>Subtotal: {formatRupiah(selectedOrder.subtotal)}</div>
-                <div style={{ color: 'var(--text-secondary)', fontSize: 'var(--text-sm)' }}>PPN 11%: {formatRupiah(selectedOrder.tax)}</div>
+                {selectedOrder.tax > 0 && (
+                  <div style={{ color: 'var(--text-secondary)', fontSize: 'var(--text-sm)' }}>PPN 11%: {formatRupiah(selectedOrder.tax)}</div>
+                )}
                 <div style={{ fontWeight: '800', fontSize: 'var(--text-xl)', color: 'var(--color-primary-light)', marginTop: '4px' }}>
                   Total: {formatRupiah(selectedOrder.total)}
                 </div>

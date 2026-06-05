@@ -56,10 +56,6 @@ export default function ReceiptPreview({ order, onClose }) {
           <span>Subtotal</span>
           <span>${formatRupiah(order.subtotal)}</span>
         </div>
-        <div class="row">
-          <span>PPN 11%</span>
-          <span>${formatRupiah(order.tax)}</span>
-        </div>
         <div class="divider"></div>
         <div class="row total-row">
           <span>TOTAL</span>
@@ -155,10 +151,6 @@ export default function ReceiptPreview({ order, onClose }) {
               <div style={receiptStyles.totalRow}>
                 <span>Subtotal</span>
                 <span>{formatRupiah(order.subtotal)}</span>
-              </div>
-              <div style={receiptStyles.totalRow}>
-                <span>PPN 11%</span>
-                <span>{formatRupiah(order.tax)}</span>
               </div>
               <div style={{ ...receiptStyles.totalRow, ...receiptStyles.grandTotal }}>
                 <span>TOTAL</span>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
 
 export default function Toast({ toasts, onDismiss }) {
@@ -35,7 +35,7 @@ let toastIdCounter = 0;
 export function useToast() {
   const [toasts, setToasts] = useState([]);
 
-  const addToast = (message, type = 'success', duration = 3000) => {
+  const addToast = useCallback((message, type = 'success', duration = 3000) => {
     const id = ++toastIdCounter;
     setToasts((prev) => [...prev, { id, message, type }]);
 
@@ -46,11 +46,11 @@ export function useToast() {
     }
 
     return id;
-  };
+  }, []);
 
-  const dismissToast = (id) => {
+  const dismissToast = useCallback((id) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
-  };
+  }, []);
 
   return { toasts, addToast, dismissToast };
 }

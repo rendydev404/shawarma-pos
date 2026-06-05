@@ -64,10 +64,6 @@ export default function CheckoutModal({ total, subtotal, tax, items, onConfirm, 
               <span>Subtotal</span>
               <span>{formatRupiah(subtotal)}</span>
             </div>
-            <div style={checkoutStyles.summaryRow}>
-              <span>PPN 11%</span>
-              <span>{formatRupiah(tax)}</span>
-            </div>
             <div style={checkoutStyles.summaryDivider} />
             <div style={checkoutStyles.totalRow}>
               <span>TOTAL</span>
