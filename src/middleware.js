@@ -6,9 +6,16 @@ export async function middleware(request) {
     request,
   });
 
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  
+  // Safe fallback to prevent build/runtime crash when env vars are missing
+  const safeUrl = url && url.startsWith('http') ? url : 'https://placeholder.supabase.co';
+  const safeKey = anonKey || 'placeholder';
+
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    safeUrl,
+    safeKey,
     {
       cookies: {
         getAll() {
@@ -29,10 +36,18 @@ export async function middleware(request) {
     }
   );
 
-  // Refresh session
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // Refresh session safely
+  let user = null;
+  try {
+    if (url && anonKey) {
+      const {
+        data: { user: authUser },
+      } = await supabase.auth.getUser();
+      user = authUser;
+    }
+  } catch (err) {
+    console.error('Middleware session refresh failed:', err.message);
+  }
 
   // Redirect unauthenticated users to login
   const isLoginPage = request.nextUrl.pathname === '/login';
@@ -45,15 +60,19 @@ export async function middleware(request) {
     return NextResponse.redirect(url);
   }
 
-  // Get user profile role for routing decisions
+  // Get user profile role for routing decisions safely
   let profile = null;
   if (user) {
-    const { data } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single();
-    profile = data;
+    try {
+      const { data } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+      profile = data;
+    } catch (err) {
+      console.error('Middleware profile fetch failed:', err.message);
+    }
   }
 
   // Redirect authenticated users away from login to their respective home page
