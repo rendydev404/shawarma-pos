@@ -17,7 +17,7 @@ export function SidebarProvider({ children }) {
   // Automatically close mobile drawer when window is resized to desktop width
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth > 768) {
+      if (window.innerWidth > 1024) {
         setMobileOpen(false);
       }
     };
@@ -26,7 +26,7 @@ export function SidebarProvider({ children }) {
   }, []);
 
   const toggleSidebar = () => {
-    if (window.innerWidth <= 768) {
+    if (window.innerWidth <= 1024) {
       setMobileOpen((prev) => !prev);
     } else {
       setSidebarCollapsed((prev) => !prev);
