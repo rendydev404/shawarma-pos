@@ -316,7 +316,7 @@ function CreateUserModal({ outlets, onSave, onClose }) {
               <label>Password *</label>
               <input className="input" type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required placeholder="Min. 6 karakter" minLength={6} />
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div className="input-group">
                 <label>Outlet *</label>
                 <SearchableSelect
@@ -375,7 +375,7 @@ function EditUserModal({ user, outlets, onSave, onClose }) {
               </div>
             )}
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div className="input-group">
                 <label>Outlet *</label>
                 <SearchableSelect
