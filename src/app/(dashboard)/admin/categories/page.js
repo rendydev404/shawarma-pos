@@ -4,9 +4,11 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/components/AuthProvider';
 import Header from '@/components/Header';
 import Toast, { useToast } from '@/components/ui/Toast';
+import { useDialog } from '@/components/ui/DialogProvider';
 
 export default function CategoriesAdminPage() {
   const { profile, supabase } = useAuth();
+  const { confirm } = useDialog();
   const [categories, setCategories] = useState([]);
   const [pusatId, setPusatId] = useState('');
   const [loading, setLoading] = useState(true);
@@ -98,7 +100,8 @@ export default function CategoriesAdminPage() {
   // Handle Delete
   const handleDeleteCategory = async (id, name) => {
     try {
-      if (!confirm(`Hapus kategori "${name}"? Produk yang menggunakan kategori ini akan kehilangan relasinya.`)) return;
+      const isConfirmed = await confirm(`Hapus kategori "${name}"? Produk yang menggunakan kategori ini akan kehilangan relasinya.`, { isDanger: true });
+      if (!isConfirmed) return;
 
       const { error } = await supabase
         .from('categories')

@@ -4,14 +4,17 @@ import { AuthProvider, useAuth } from './AuthProvider';
 import Sidebar from './Sidebar';
 import Toast, { useToast } from './ui/Toast';
 import { SidebarProvider, useSidebar } from './SidebarContext';
+import { DialogProvider } from './ui/DialogProvider';
 
 export default function DashboardShell({ user, profile, children }) {
   return (
     <AuthProvider initialUser={user} initialProfile={profile}>
       <SidebarProvider>
-        <DashboardShellContent profile={profile}>
-          {children}
-        </DashboardShellContent>
+        <DialogProvider>
+          <DashboardShellContent profile={profile}>
+            {children}
+          </DashboardShellContent>
+        </DialogProvider>
       </SidebarProvider>
     </AuthProvider>
   );

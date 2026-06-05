@@ -19,14 +19,20 @@ export default function LoginPage() {
     setError('');
 
     try {
+      let loginEmail = email.trim();
+      // Jika input bukan email (tidak ada '@'), anggap sebagai username dan tambahkan domain palsu
+      if (!loginEmail.includes('@')) {
+        loginEmail = `${loginEmail}@shawarma.local`;
+      }
+
       const { error: authError } = await supabase.auth.signInWithPassword({
-        email,
+        email: loginEmail,
         password,
       });
 
       if (authError) {
-        if (authError.message.includes('Invalid login')) {
-          setError('Email atau password salah');
+        if (authError.message.toLowerCase().includes('invalid login credentials')) {
+          setError('Username/Email atau password salah');
         } else {
           setError(authError.message);
         }
@@ -67,18 +73,18 @@ export default function LoginPage() {
           )}
 
           <div className="input-group">
-            <label htmlFor="login-email">Email</label>
+            <label htmlFor="login-email">Username / Email</label>
             <div className="input-with-icon" style={{ width: '100%' }}>
-              <span className="material-icons-round">mail</span>
+              <span className="material-icons-round">person</span>
               <input
                 id="login-email"
-                type="email"
+                type="text"
                 className="input"
-                placeholder="nama@email.com"
+                placeholder="kasir1 / admin@email.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                autoComplete="email"
+                autoComplete="username"
                 autoFocus
                 style={{ width: '100%' }}
               />

@@ -4,11 +4,13 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/components/AuthProvider';
 import Header from '@/components/Header';
 import Toast, { useToast } from '@/components/ui/Toast';
+import { useDialog } from '@/components/ui/DialogProvider';
 import { formatRupiah } from '@/lib/utils';
 import JSZip from 'jszip';
 
 export default function MenuPage() {
   const { profile, supabase } = useAuth();
+  const { confirm, alert } = useDialog();
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -124,7 +126,8 @@ export default function MenuPage() {
   };
 
   const handleDeleteCategory = async (id) => {
-    if (!confirm('Hapus kategori ini?')) return;
+    const isConfirmed = await confirm('Hapus kategori ini?', { isDanger: true });
+    if (!isConfirmed) return;
     try {
       const { error } = await supabase.from('categories').delete().eq('id', id);
       if (error) throw error;
@@ -167,7 +170,8 @@ export default function MenuPage() {
   };
 
   const handleDeleteProduct = async (id) => {
-    if (!confirm('Hapus produk ini?')) return;
+    const isConfirmed = await confirm('Hapus produk ini?', { isDanger: true });
+    if (!isConfirmed) return;
     try {
       const { error } = await supabase.from('products').delete().eq('id', id);
       if (error) throw error;
@@ -179,7 +183,8 @@ export default function MenuPage() {
   };
 
   const handleDeleteAllProducts = async () => {
-    if (!confirm('Apakah Anda yakin ingin menghapus SEMUA produk di outlet ini? Tindakan ini tidak dapat dibatalkan.')) return;
+    const isConfirmed = await confirm('Apakah Anda yakin ingin menghapus SEMUA produk di outlet ini? Tindakan ini tidak dapat dibatalkan.', { isDanger: true });
+    if (!isConfirmed) return;
     
     setLoading(true);
     try {
@@ -488,6 +493,7 @@ export default function MenuPage() {
 // Product Modal Component
 function ProductModal({ product, categories, onSave, onClose, isSuperAdmin, pusatId, onCategoryAdded }) {
   const { supabase } = useAuth();
+  const { alert } = useDialog();
   const [uploading, setUploading] = useState(false);
   const [imageSource, setImageSource] = useState(
     product?.image_url && !product.image_url.includes('supabase.co/storage') ? 'url' : 'upload'
@@ -535,7 +541,7 @@ function ProductModal({ product, categories, onSave, onClose, isSuperAdmin, pusa
       }
     } catch (err) {
       console.error('Failed to add category:', err);
-      alert('Gagal menambahkan kategori: ' + err.message);
+      alert('Gagal menambahkan kategori: ' + err.message, { title: 'Error' });
     } finally {
       setAddingCategory(false);
     }
@@ -543,11 +549,11 @@ function ProductModal({ product, categories, onSave, onClose, isSuperAdmin, pusa
 
   const uploadFile = useCallback(async (file) => {
     if (!file.type.startsWith('image/')) {
-      alert('File harus berupa gambar');
+      alert('File harus berupa gambar', { title: 'Format Tidak Valid' });
       return;
     }
     if (file.size > 2 * 1024 * 1024) {
-      alert('Ukuran gambar maksimal 2MB');
+      alert('Ukuran gambar maksimal 2MB', { title: 'File Terlalu Besar' });
       return;
     }
 
@@ -574,7 +580,7 @@ function ProductModal({ product, categories, onSave, onClose, isSuperAdmin, pusa
       setUrlInput(publicUrl);
     } catch (err) {
       console.error('Upload error:', err);
-      alert('Gagal mengupload gambar: ' + err.message);
+      alert('Gagal mengupload gambar: ' + err.message, { title: 'Error Upload' });
     } finally {
       setUploading(false);
     }

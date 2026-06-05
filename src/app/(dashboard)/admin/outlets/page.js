@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/components/AuthProvider';
 import Header from '@/components/Header';
 import Toast, { useToast } from '@/components/ui/Toast';
+import { useDialog } from '@/components/ui/DialogProvider';
 
 const TARGET_OUTLETS = [
   {
@@ -105,6 +106,7 @@ const TARGET_OUTLETS = [
 
 export default function OutletsPage() {
   const { profile, supabase } = useAuth();
+  const { confirm } = useDialog();
   const [outlets, setOutlets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -238,9 +240,8 @@ export default function OutletsPage() {
   };
 
   const handleDelete = async (outletId) => {
-    if (!confirm('Apakah Anda yakin ingin menghapus outlet ini? Semua data kode dan nama outlet akan diurutkan kembali otomatis.')) {
-      return;
-    }
+    const isConfirmed = await confirm('Apakah Anda yakin ingin menghapus outlet ini? Semua data kode dan nama outlet akan diurutkan kembali otomatis.', { isDanger: true });
+    if (!isConfirmed) return;
 
     setLoading(true);
     try {

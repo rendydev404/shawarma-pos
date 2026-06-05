@@ -4,11 +4,13 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/components/AuthProvider';
 import Header from '@/components/Header';
 import Toast, { useToast } from '@/components/ui/Toast';
+import { useDialog } from '@/components/ui/DialogProvider';
 import { formatRupiah, formatDate, formatTime } from '@/lib/utils';
 import { ORDER_STATUS_LABELS, PAYMENT_METHOD_LABELS } from '@/lib/constants';
 
 export default function OrdersPage() {
   const { profile, supabase } = useAuth();
+  const { confirm } = useDialog();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState({ status: 'all', payment: 'all', search: '' });
@@ -85,7 +87,8 @@ export default function OrdersPage() {
       return;
     }
 
-    if (!confirm('Batalkan order ini?')) return;
+    const isConfirmed = await confirm('Batalkan order ini?', { isDanger: true });
+    if (!isConfirmed) return;
     try {
       const { error } = await supabase.from('orders').update({ status: 'cancelled' }).eq('id', orderId);
       if (error) throw error;
@@ -179,7 +182,9 @@ export default function OrdersPage() {
                       {formatDate(order.created_at)}
                     </td>
                     <td>{order.customer_name || '-'}</td>
-                    <td style={{ fontSize: 'var(--text-xs)' }}>{order.profiles?.full_name || '-'}</td>
+                    <td style={{ fontSize: 'var(--text-xs)' }}>
+                      {order.profiles?.full_name ? order.profiles.full_name : (order.cashier_id === null ? 'User sudah dihapus' : '-')}
+                    </td>
                     <td>
                       <span className="badge badge-info">{PAYMENT_METHOD_LABELS[order.payment_method] || order.payment_method}</span>
                     </td>
@@ -217,7 +222,7 @@ export default function OrdersPage() {
             <div className="modal-body">
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px', marginBottom: '20px' }}>
                 <div><span style={{ color: 'var(--text-tertiary)', fontSize: 'var(--text-xs)' }}>Tanggal</span><br />{formatDate(selectedOrder.created_at)}</div>
-                <div><span style={{ color: 'var(--text-tertiary)', fontSize: 'var(--text-xs)' }}>Kasir</span><br />{selectedOrder.profiles?.full_name || '-'}</div>
+                <div><span style={{ color: 'var(--text-tertiary)', fontSize: 'var(--text-xs)' }}>Kasir</span><br />{selectedOrder.profiles?.full_name ? selectedOrder.profiles.full_name : (selectedOrder.cashier_id === null ? 'User sudah dihapus' : '-')}</div>
                 <div><span style={{ color: 'var(--text-tertiary)', fontSize: 'var(--text-xs)' }}>Pelanggan</span><br />{selectedOrder.customer_name || '-'}</div>
                 <div><span style={{ color: 'var(--text-tertiary)', fontSize: 'var(--text-xs)' }}>Pembayaran</span><br />{PAYMENT_METHOD_LABELS[selectedOrder.payment_method]}</div>
               </div>

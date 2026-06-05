@@ -4,11 +4,13 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/components/AuthProvider';
 import Header from '@/components/Header';
 import Toast, { useToast } from '@/components/ui/Toast';
+import { useDialog } from '@/components/ui/DialogProvider';
 import { ROLE_LABELS, ROLES } from '@/lib/constants';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 
 export default function UsersPage() {
   const { profile, supabase } = useAuth();
+  const { confirm, alert } = useDialog();
   const [users, setUsers] = useState([]);
   const [outlets, setOutlets] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -49,8 +51,13 @@ export default function UsersPage() {
         }
       );
 
+      let signupEmail = form.username.trim();
+      if (!signupEmail.includes('@')) {
+        signupEmail = `${signupEmail}@shawarma.local`;
+      }
+
       const { data: authData, error: authError } = await tempSupabase.auth.signUp({
-        email: form.email,
+        email: signupEmail,
         password: form.password,
         options: {
           data: {
@@ -62,7 +69,16 @@ export default function UsersPage() {
       });
 
       if (authError) throw authError;
-      addToast('User berhasil dibuat! Email konfirmasi telah dikirim.', 'success');
+
+      // Update profiles with username & plain_password
+      if (authData?.user?.id) {
+        await supabase.from('profiles').update({
+          username: form.username.trim(),
+          plain_password: form.password,
+        }).eq('id', authData.user.id);
+      }
+
+      addToast('User berhasil dibuat!', 'success');
       setShowModal(false);
       fetchData();
     } catch (err) {
@@ -82,7 +98,8 @@ export default function UsersPage() {
   };
 
   const handleDeleteUser = async (user) => {
-    if (!confirm(`Apakah Anda yakin ingin menghapus user "${user.full_name}" secara permanen? Tindakan ini tidak dapat dibatalkan.`)) return;
+    const isConfirmed = await confirm(`Apakah Anda yakin ingin menghapus user "${user.full_name}" secara permanen? Tindakan ini tidak dapat dibatalkan.`, { isDanger: true });
+    if (!isConfirmed) return;
 
     try {
       const { error } = await supabase.rpc('delete_user', { user_id: user.id });
@@ -162,6 +179,7 @@ export default function UsersPage() {
                   <th>Outlet</th>
                   <th>Role</th>
                   <th>Status</th>
+                  <th>Password</th>
                   <th>Aksi</th>
                 </tr>
               </thead>
@@ -180,11 +198,9 @@ export default function UsersPage() {
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
                           <span style={{ fontWeight: '600' }}>{user.full_name}</span>
-                          {user.email && (
-                            <span style={{ fontSize: '10px', color: 'var(--text-tertiary)', marginTop: '2px' }}>
-                              {user.email}
-                            </span>
-                          )}
+                          <span style={{ fontSize: '10px', color: 'var(--text-tertiary)', marginTop: '2px' }}>
+                            {user.username || user.email}
+                          </span>
                         </div>
                       </div>
                     </td>
@@ -209,6 +225,23 @@ export default function UsersPage() {
                       <span className={`badge ${user.is_active ? 'badge-success' : 'badge-danger'}`}>
                         {user.is_active ? 'Aktif' : 'Nonaktif'}
                       </span>
+                    </td>
+                    <td>
+                      {user.role !== 'super_admin' && user.plain_password ? (
+                        <div style={{ position: 'relative' }}>
+                          <button
+                            className="btn btn-ghost btn-sm"
+                            onClick={() => alert(`Password untuk ${user.full_name}: ${user.plain_password}`, { title: 'Informasi Password' })}
+                            title="Lihat Password"
+                            style={{ padding: '4px', fontSize: '10px' }}
+                          >
+                            <span className="material-icons-round" style={{ fontSize: '16px' }}>visibility</span>
+                            Lihat
+                          </button>
+                        </div>
+                      ) : (
+                        <span style={{ fontSize: '10px', color: 'var(--text-tertiary)' }}>-</span>
+                      )}
                     </td>
                     <td>
                       <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
@@ -258,7 +291,7 @@ export default function UsersPage() {
 
 function CreateUserModal({ outlets, onSave, onClose }) {
   const [form, setForm] = useState({
-    email: '', password: '', full_name: '', role: 'cashier', outlet_id: '',
+    username: '', password: '', full_name: '', role: 'cashier', outlet_id: '',
   });
 
   return (
@@ -275,8 +308,8 @@ function CreateUserModal({ outlets, onSave, onClose }) {
               <input className="input" value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} required placeholder="Ahmad Kasir" />
             </div>
             <div className="input-group">
-              <label>Email *</label>
-              <input className="input" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required placeholder="nama@email.com" />
+              <label>Username (atau Email jika Super Admin) *</label>
+              <input className="input" type="text" value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value })} required placeholder="kasir1 / admin@email.com" />
             </div>
             <div className="input-group">
               <label>Password *</label>
