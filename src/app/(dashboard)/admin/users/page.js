@@ -5,7 +5,7 @@ import { useAuth } from '@/components/AuthProvider';
 import Header from '@/components/Header';
 import Toast, { useToast } from '@/components/ui/Toast';
 import { ROLE_LABELS, ROLES } from '@/lib/constants';
-import { createBrowserClient } from '@supabase/ssr';
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 
 export default function UsersPage() {
   const { profile, supabase } = useAuth();
@@ -37,7 +37,7 @@ export default function UsersPage() {
 
   const handleCreateUser = async (form) => {
     try {
-      const tempSupabase = createBrowserClient(
+      const tempSupabase = createSupabaseClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
         {
@@ -45,12 +45,6 @@ export default function UsersPage() {
             persistSession: false,
             autoRefreshToken: false,
             detectSessionInUrl: false,
-            storageKey: 'temp-auth-create-user',
-            storage: {
-              getItem: () => null,
-              setItem: () => {},
-              removeItem: () => {},
-            },
           },
         }
       );
