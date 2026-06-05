@@ -37,8 +37,6 @@ export default function UsersPage() {
 
   const handleCreateUser = async (form) => {
     try {
-      // Create a temporary Supabase client with persistSession: false
-      // so it doesn't overwrite the logged-in admin's session in localStorage/cookies
       const tempSupabase = createBrowserClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
@@ -47,6 +45,12 @@ export default function UsersPage() {
             persistSession: false,
             autoRefreshToken: false,
             detectSessionInUrl: false,
+            storageKey: 'temp-auth-create-user',
+            storage: {
+              getItem: () => null,
+              setItem: () => {},
+              removeItem: () => {},
+            },
           },
         }
       );
