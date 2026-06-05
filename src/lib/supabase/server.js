@@ -4,9 +4,16 @@ import { cookies } from 'next/headers';
 export async function createClient() {
   const cookieStore = await cookies();
 
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  
+  // Safe fallback to prevent build crash when env vars are missing
+  const safeUrl = url && url.startsWith('http') ? url : 'https://uqjahxvyqpxfvkeutwpm.supabase.co';
+  const safeKey = anonKey || 'placeholder';
+
   return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    safeUrl,
+    safeKey,
     {
       cookies: {
         getAll() {

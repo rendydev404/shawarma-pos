@@ -6,9 +6,16 @@ export async function middleware(request) {
     request,
   });
 
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  
+  // Safe fallback to prevent build/runtime crash when env vars are missing
+  const safeUrl = url && url.startsWith('http') ? url : 'https://uqjahxvyqpxfvkeutwpm.supabase.co';
+  const safeKey = anonKey || 'placeholder';
+
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    safeUrl,
+    safeKey,
     {
       cookies: {
         getAll() {
