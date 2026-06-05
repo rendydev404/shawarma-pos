@@ -76,7 +76,7 @@ export default function MenuPage() {
         supabase
           .from('products')
           .select('*, categories(name)')
-          .eq('outlet_id', selectedOutletId)
+          .in('outlet_id', [selectedOutletId, pusatId])
           .order('sort_order')
       ]);
 
@@ -308,24 +308,7 @@ export default function MenuPage() {
             Daftar Produk ({filteredProducts.length})
           </div>
           <div style={{ flex: 1 }} />
-          {selectedOutletId && (() => {
-            const currentOutlet = outlets.find(o => o.id === selectedOutletId) || profile?.outlets;
-            const isPusat = currentOutlet?.code === 'OTL01' || currentOutlet?.name?.toLowerCase().includes('pusat');
-            if (!isPusat) {
-              return (
-                <button
-                  className="btn btn-secondary"
-                  onClick={() => setShowImportModal(true)}
-                  style={{ marginRight: '8px' }}
-                  id="menu-import-pusat"
-                >
-                  <span className="material-icons-round">cloud_download</span>
-                  Import dari Pusat
-                </button>
-              );
-            }
-            return null;
-          })()}
+
           {selectedOutletId && (
             <button
               className="btn btn-secondary"
@@ -414,6 +397,11 @@ export default function MenuPage() {
                     ) : (
                       <span className="material-icons-round" style={{ fontSize: '40px', color: 'var(--text-tertiary)' }}>restaurant</span>
                     )}
+                    {product.outlet_id !== selectedOutletId && (
+                      <span className="badge badge-accent" style={{ ...menuStyles.statusBadge, right: 'auto', left: '8px' }}>
+                        Pusat
+                      </span>
+                    )}
                     <span className={`badge ${product.is_available ? 'badge-success' : 'badge-danger'}`} style={menuStyles.statusBadge}>
                       {product.is_available ? 'Tersedia' : 'Habis'}
                     </span>
@@ -425,21 +413,28 @@ export default function MenuPage() {
                     )}
                     <span style={menuStyles.prodPrice}>{formatRupiah(product.price)}</span>
                   </div>
-                  <div style={menuStyles.productActions}>
-                    <button className="btn btn-ghost btn-sm" onClick={() => toggleAvailability(product)}
-                      title={product.is_available ? 'Tandai habis' : 'Tandai tersedia'}>
-                      <span className="material-icons-round" style={{ fontSize: '18px' }}>
-                        {product.is_available ? 'remove_circle_outline' : 'check_circle_outline'}
-                      </span>
-                    </button>
-                    <button className="btn btn-ghost btn-sm" onClick={() => { setEditingProduct(product); setShowProductModal(true); }}>
-                      <span className="material-icons-round" style={{ fontSize: '18px' }}>edit</span>
-                    </button>
-                    <button className="btn btn-ghost btn-sm" onClick={() => handleDeleteProduct(product.id)}
-                      style={{ color: 'var(--color-danger)' }}>
-                      <span className="material-icons-round" style={{ fontSize: '18px' }}>delete</span>
-                    </button>
-                  </div>
+                  {product.outlet_id === selectedOutletId ? (
+                    <div style={menuStyles.productActions}>
+                      <button className="btn btn-ghost btn-sm" onClick={() => toggleAvailability(product)}
+                        title={product.is_available ? 'Tandai habis' : 'Tandai tersedia'}>
+                        <span className="material-icons-round" style={{ fontSize: '18px' }}>
+                          {product.is_available ? 'remove_circle_outline' : 'check_circle_outline'}
+                        </span>
+                      </button>
+                      <button className="btn btn-ghost btn-sm" onClick={() => { setEditingProduct(product); setShowProductModal(true); }}>
+                        <span className="material-icons-round" style={{ fontSize: '18px' }}>edit</span>
+                      </button>
+                      <button className="btn btn-ghost btn-sm" onClick={() => handleDeleteProduct(product.id)}
+                        style={{ color: 'var(--color-danger)' }}>
+                        <span className="material-icons-round" style={{ fontSize: '18px' }}>delete</span>
+                      </button>
+                    </div>
+                  ) : (
+                    <div style={{ ...menuStyles.productActions, justifyContent: 'center', color: 'var(--text-tertiary)', fontSize: '11px', fontWeight: '600', fontStyle: 'italic' }}>
+                      <span className="material-icons-round" style={{ fontSize: '14px', marginRight: '4px' }}>info</span>
+                      Produk Pusat (Read Only)
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

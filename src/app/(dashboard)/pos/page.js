@@ -132,7 +132,7 @@ export default function POSPage() {
         supabase
           .from('products')
           .select('*, categories(name)')
-          .eq('outlet_id', outletId)
+          .in('outlet_id', [outletId, pusatId])
           .eq('is_available', true)
           .order('sort_order', { ascending: true }),
       ]);
