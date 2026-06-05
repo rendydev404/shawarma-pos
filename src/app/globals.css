@@ -933,7 +933,7 @@ tr:hover td {
 /* Tablet and Mobile adjustments for POS Menu Grid */
 @media (max-width: 1024px) {
   .pos-menu-grid {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
     gap: var(--space-sm);
   }
   .pos-menu-card {
@@ -1043,6 +1043,21 @@ tr:hover td {
 
 /* Responsive Media Queries */
 @media (max-width: 1024px) {
+  /* Sidebar drawer behavior on tablet & mobile */
+  .sidebar-container {
+    width: 260px !important;
+    transform: translateX(-100%);
+    z-index: 200;
+  }
+
+  .sidebar-container.mobile-open {
+    transform: translateX(0);
+  }
+
+  .main-content {
+    margin-left: 0 !important;
+  }
+
   /* POS layout collapses sidebar cart to overlay drawer */
   .pos-cart-panel {
     position: fixed;
@@ -1099,21 +1114,6 @@ tr:hover td {
     --space-lg: 16px;
     --space-xl: 24px;
     --space-2xl: 32px;
-  }
-
-  /* Sidebar drawer behavior on mobile */
-  .sidebar-container {
-    width: 260px !important;
-    transform: translateX(-100%);
-    z-index: 200;
-  }
-
-  .sidebar-container.mobile-open {
-    transform: translateX(0);
-  }
-
-  .main-content {
-    margin-left: 0 !important;
   }
 
   /* Table padding optimizations */
