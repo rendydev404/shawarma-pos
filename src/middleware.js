@@ -6,16 +6,9 @@ export async function middleware(request) {
     request,
   });
 
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  
-  // Safe fallback to prevent build/runtime crash when env vars are missing
-  const safeUrl = url && url.startsWith('http') ? url : 'https://placeholder.supabase.co';
-  const safeKey = anonKey || 'placeholder';
-
   const supabase = createServerClient(
-    safeUrl,
-    safeKey,
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     {
       cookies: {
         getAll() {
@@ -39,7 +32,7 @@ export async function middleware(request) {
   // Refresh session safely
   let user = null;
   try {
-    if (url && anonKey) {
+    if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
       const {
         data: { user: authUser },
       } = await supabase.auth.getUser();
