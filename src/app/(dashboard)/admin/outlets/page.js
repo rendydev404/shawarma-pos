@@ -169,33 +169,7 @@ export default function OutletsPage() {
             existing.splice(0, existing.length, ...refetchedData);
           }
         }
-      }
-
-      // 2. Run automatic migration to update names & addresses to the target list if they don't match yet
-      if (existing.length > 0 && existing[0].name !== 'SUKA SHAWARMA KITCHEN') {
-        for (let i = 0; i < existing.length; i++) {
-          const target = TARGET_OUTLETS[i];
-          if (target) {
-            const { error: updateErr } = await supabase
-              .from('outlets')
-              .update({
-                name: target.name,
-                address: target.address,
-                phone: target.phone || existing[i].phone
-              })
-              .eq('id', existing[i].id);
-            if (updateErr) {
-              console.error(`Failed to migrate outlet ${existing[i].id}:`, updateErr);
-            }
-          }
-        }
-        // Fetch again after updating names & addresses
-        const { data: migratedData, error: migrateErr } = await supabase.from('outlets').select('*').order('code');
-        if (!migrateErr && migratedData) {
-          setOutlets(migratedData);
-          return;
-        }
-      }
+      // Automatic migration block removed so user edits are not overwritten
 
       setOutlets(existing);
     } catch (err) {
