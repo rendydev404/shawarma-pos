@@ -204,18 +204,10 @@ export default function MenuPage() {
     
     setLoading(true);
     try {
-      // 1. Fetch current local categories to avoid duplicate checks
-      const { data: localCats } = await supabase
-        .from('categories')
-        .select('*')
-        .eq('outlet_id', selectedOutletId);
-      
-      const localCatsList = [...(localCats || [])];
-      
-      // 2. Fetch the actual products to import from Pusat
+      // 1. Fetch the actual products to import from Pusat
       const { data: masterProds } = await supabase
         .from('products')
-        .select('*, categories(name)')
+        .select('*')
         .eq('outlet_id', pusat.id)
         .in('id', selectedProductIds);
       
@@ -226,42 +218,14 @@ export default function MenuPage() {
       
       let importCount = 0;
       
-      // 3. For each product, match/create category and insert product
+      // 2. For each product, copy category_id directly and insert product
       for (const prod of masterProds) {
-        let localCatId = null;
-        const catName = prod.categories?.name;
-        
-        if (catName) {
-          // Check if category exists locally
-          let localCat = localCatsList.find(c => c.name.toLowerCase() === catName.toLowerCase());
-          if (!localCat) {
-            // Create local category
-            const { data: newCat, error: catErr } = await supabase
-              .from('categories')
-              .insert({
-                outlet_id: selectedOutletId,
-                name: catName,
-                sort_order: 0,
-                is_active: true
-              })
-              .select()
-              .single();
-              
-            if (catErr) throw catErr;
-            if (newCat) {
-              localCat = newCat;
-              localCatsList.push(newCat); // cache for next products
-            }
-          }
-          localCatId = localCat?.id;
-        }
-        
         // Insert product
         const { error: prodErr } = await supabase
           .from('products')
           .insert({
             outlet_id: selectedOutletId,
-            category_id: localCatId,
+            category_id: prod.category_id,
             name: prod.name,
             description: prod.description,
             price: prod.price,
