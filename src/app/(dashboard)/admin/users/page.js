@@ -5,6 +5,7 @@ import { useAuth } from '@/components/AuthProvider';
 import Header from '@/components/Header';
 import Toast, { useToast } from '@/components/ui/Toast';
 import { useDialog } from '@/components/ui/DialogProvider';
+import SearchableSelect from '@/components/ui/SearchableSelect';
 import { ROLE_LABELS, ROLES } from '@/lib/constants';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 
@@ -318,12 +319,13 @@ function CreateUserModal({ outlets, onSave, onClose }) {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
               <div className="input-group">
                 <label>Outlet *</label>
-                <select className="input" value={form.outlet_id} onChange={(e) => setForm({ ...form, outlet_id: e.target.value })} required>
-                  <option value="">Pilih Outlet</option>
-                  {outlets.map((o) => (
-                    <option key={o.id} value={o.id}>{o.code} - {o.name}</option>
-                  ))}
-                </select>
+                <SearchableSelect
+                  options={outlets.map((o) => ({ value: o.id, label: `${o.code} - ${o.name}` }))}
+                  value={form.outlet_id}
+                  onChange={(val) => setForm({ ...form, outlet_id: val })}
+                  placeholder="Pilih Outlet"
+                  required
+                />
               </div>
               <div className="input-group">
                 <label>Role *</label>
@@ -376,12 +378,13 @@ function EditUserModal({ user, outlets, onSave, onClose }) {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
               <div className="input-group">
                 <label>Outlet *</label>
-                <select className="input" value={form.outlet_id} onChange={(e) => setForm({ ...form, outlet_id: e.target.value })} required>
-                  <option value="">Pilih Outlet</option>
-                  {outlets.map((o) => (
-                    <option key={o.id} value={o.id}>{o.code} - {o.name}</option>
-                  ))}
-                </select>
+                <SearchableSelect
+                  options={outlets.map((o) => ({ value: o.id, label: `${o.code} - ${o.name}` }))}
+                  value={form.outlet_id}
+                  onChange={(val) => setForm({ ...form, outlet_id: val })}
+                  placeholder="Pilih Outlet"
+                  required
+                />
               </div>
               <div className="input-group">
                 <label>Role *</label>
