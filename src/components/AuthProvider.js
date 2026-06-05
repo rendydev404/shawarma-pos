@@ -28,7 +28,7 @@ export function AuthProvider({ children, initialUser, initialProfile }) {
         } else if (event === 'SIGNED_OUT') {
           setUser(null);
           setProfile(null);
-          router.push('/login');
+          window.location.href = '/login';
         }
       }
     );
@@ -40,8 +40,7 @@ export function AuthProvider({ children, initialUser, initialProfile }) {
     setLoading(true);
     await supabase.auth.signOut();
     setLoading(false);
-    router.push('/login');
-    router.refresh();
+    window.location.href = '/login';
   };
 
   return (
