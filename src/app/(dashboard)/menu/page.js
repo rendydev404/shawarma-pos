@@ -178,6 +178,28 @@ export default function MenuPage() {
     }
   };
 
+  const handleDeleteAllProducts = async () => {
+    if (!confirm('Apakah Anda yakin ingin menghapus SEMUA produk di outlet ini? Tindakan ini tidak dapat dibatalkan.')) return;
+    
+    setLoading(true);
+    try {
+      const { error } = await supabase
+        .from('products')
+        .delete()
+        .eq('outlet_id', selectedOutletId);
+
+      if (error) throw error;
+      
+      addToast('Semua produk di outlet ini berhasil dihapus', 'success');
+      fetchData();
+    } catch (err) {
+      console.error('Delete all error:', err);
+      addToast('Gagal menghapus produk: ' + err.message, 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const toggleAvailability = async (product) => {
     try {
       const { error } = await supabase.from('products')
@@ -313,6 +335,17 @@ export default function MenuPage() {
             >
               <span className="material-icons-round">folder_zip</span>
               Upload ZIP
+            </button>
+          )}
+          {selectedOutletId && products.length > 0 && (
+            <button
+              className="btn btn-danger"
+              onClick={handleDeleteAllProducts}
+              style={{ marginRight: '8px' }}
+              id="menu-delete-all"
+            >
+              <span className="material-icons-round">delete_sweep</span>
+              Hapus Semua
             </button>
           )}
           <button
