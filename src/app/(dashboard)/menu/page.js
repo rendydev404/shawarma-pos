@@ -309,7 +309,7 @@ export default function MenuPage() {
           </div>
           <div style={{ flex: 1 }} />
 
-          {selectedOutletId && (
+          {selectedOutletId && selectedOutletId === pusatId && (
             <button
               className="btn btn-secondary"
               onClick={() => setShowZipModal(true)}
@@ -320,7 +320,7 @@ export default function MenuPage() {
               Upload ZIP
             </button>
           )}
-          {selectedOutletId && products.length > 0 && (
+          {selectedOutletId && selectedOutletId === pusatId && products.length > 0 && (
             <button
               className="btn btn-danger"
               onClick={handleDeleteAllProducts}

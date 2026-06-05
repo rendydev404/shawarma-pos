@@ -14,9 +14,20 @@ export default function OrdersPage() {
   const [filter, setFilter] = useState({ status: 'all', payment: 'all', search: '' });
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [orderItems, setOrderItems] = useState([]);
+  const [currentTime, setCurrentTime] = useState(Date.now());
   const { toasts, addToast, dismissToast } = useToast();
 
   const outletId = profile?.outlet_id || profile?.outlets?.id;
+
+  useEffect(() => {
+    let interval;
+    if (selectedOrder && selectedOrder.status === 'completed') {
+      interval = setInterval(() => {
+        setCurrentTime(Date.now());
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [selectedOrder]);
 
   const fetchOrders = useCallback(async () => {
     if (!outletId) {
@@ -49,6 +60,7 @@ export default function OrdersPage() {
 
   const viewOrderDetail = async (order) => {
     setSelectedOrder(order);
+    setCurrentTime(Date.now());
     try {
       const { data } = await supabase
         .from('order_items')
@@ -60,7 +72,19 @@ export default function OrdersPage() {
     }
   };
 
+  const isCancellable = (createdAt) => {
+    if (!createdAt) return false;
+    const diff = currentTime - new Date(createdAt).getTime();
+    return diff <= 15 * 1000; // 15 detik
+  };
+
   const cancelOrder = async (orderId) => {
+    const order = orders.find(o => o.id === orderId);
+    if (order && !isCancellable(order.created_at)) {
+      addToast('Batas waktu pembatalan (15 detik) telah habis', 'error');
+      return;
+    }
+
     if (!confirm('Batalkan order ini?')) return;
     try {
       const { error } = await supabase.from('orders').update({ status: 'cancelled' }).eq('id', orderId);
@@ -231,7 +255,9 @@ export default function OrdersPage() {
               </div>
             </div>
             <div className="modal-footer">
-              {selectedOrder.status === 'completed' && (profile?.role === 'super_admin' || profile?.role === 'outlet_manager') && (
+              {selectedOrder.status === 'completed' && 
+               (profile?.role === 'super_admin' || profile?.role === 'outlet_manager') && 
+               isCancellable(selectedOrder.created_at) && (
                 <button className="btn btn-danger" onClick={() => cancelOrder(selectedOrder.id)}>
                   <span className="material-icons-round">cancel</span>Batalkan Order
                 </button>
